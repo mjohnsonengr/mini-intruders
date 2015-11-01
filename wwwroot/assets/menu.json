@@ -1,0 +1,58 @@
+{
+"frames": [
+	{
+		"filename": "credits1.png",
+		"frame": {"x":0, "y":26, "w":158, "h":22},
+		"spriteSourceSize": {"x":1,"y":3,"w":180,"h":30},
+		"sourceSize": {"w":180,"h":30}
+	},
+	{
+		"filename": "credits2.png",
+		"frame": {"x":0, "y":0, "w":172, "h":25},
+		"spriteSourceSize": {"x":2,"y":4,"w":200,"h":30},
+		"sourceSize": {"w":200,"h":30}
+	},
+	{
+		"filename": "exit1.png",
+		"frame": {"x":89, "y":148, "w":80, "h":22},
+		"spriteSourceSize": {"x":1,"y":4,"w":120,"h":30},
+		"sourceSize": {"w":120,"h":30}
+	},
+	{
+		"filename": "exit2.png",
+		"frame": {"x":0, "y":148, "w":88, "h":25},
+		"spriteSourceSize": {"x":2,"y":4,"w":120,"h":30},
+		"sourceSize": {"w":120,"h":30}
+	},
+	{
+		"filename": "help1.png",
+		"frame": {"x":0, "y":101, "w":100, "h":23},
+		"spriteSourceSize": {"x":1,"y":3,"w":120,"h":30},
+		"sourceSize": {"w":120,"h":30}
+	},
+	{
+		"filename": "help2.png",
+		"frame": {"x":0, "y":49, "w":109, "h":25},
+		"spriteSourceSize": {"x":2,"y":4,"w":120,"h":30},
+		"sourceSize": {"w":120,"h":30}
+	},
+	{
+		"filename": "play1.png",
+		"frame": {"x":0, "y":125, "w":100, "h":22},
+		"spriteSourceSize": {"x":2,"y":5,"w":120,"h":30},
+		"sourceSize": {"w":120,"h":30}
+	},
+	{
+		"filename": "play2.png",
+		"frame": {"x":0, "y":75, "w":109, "h":25},
+		"spriteSourceSize": {"x":2,"y":4,"w":120,"h":30},
+		"sourceSize": {"w":120,"h":30}
+	}
+
+],
+"meta": {
+	"image": "main.png",
+	"size": {"w": 173, "h": 174},
+	"scale": "1"
+}
+}
