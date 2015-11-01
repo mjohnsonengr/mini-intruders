@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "amd",
+        "moduleResolution": "node",
+        "isolatedModules": false,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "declaration": false,
+        "noImplicitAny": false,
+        "removeComments": true,
+        "noLib": false,
+        "preserveConstEnums": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "outFile": "wwwroot/js/game.js",
+        "sourceMap": true
+    },
+    "filesGlob": [
+        "src/**/*.ts",
+        "!node_modules/**"
+    ],
+    "files": [
+        "src/app.ts",
+        "src/Boot.ts",
+        "src/Game.ts",
+        "src/MainMenu.ts",
+        "src/Preloader.ts",
+        "src/typings/tsd.d.ts"
+    ],
+    "exclude": []
+}

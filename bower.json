@@ -1,0 +1,30 @@
+{
+  "name": "mini-intruders",
+  "description": "A space invaders like game",
+  "main": "wwwroot/index.html",
+  "authors": [
+    "Marcus Johnson (mjohnsonengr)"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "phaser",
+    "game",
+    "remake",
+    "clone"
+  ],
+  "homepage": "https://github.com/mjohnsonengr/mini-intruders",
+  "moduleType": [
+    "amd"
+  ],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "phaser": "~2.4.4"
+  }
+}
