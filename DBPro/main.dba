@@ -1,0 +1,481 @@
+#constant game_init 1
+#constant game_logo 2
+#constant game_menu 3
+#constant game_start 4
+#constant game_run 5
+#constant game_restart 6
+#constant game_lose 7
+#constant game_lose2 8
+#constant game_exit 9
+#constant menu_main 1
+#constant menu_help 2
+#constant menu_credits 3
+#constant select_play 1
+#constant select_help 2
+#constant select_credits 3
+#constant select_exit 4
+global game_state as integer : game_state = game_init
+global menu_state as integer : menu_state = menu_main
+
+while game_state <> game_exit
+   select game_state
+        case game_init
+            init()
+        endcase
+        case game_logo
+            logo()
+        endcase
+        case game_menu
+            menu()
+        endcase
+        case game_start
+            startgame()
+        endcase
+        case game_run
+            gameplay()
+        endcase
+        case game_restart
+            // restart game
+        endcase
+        case game_lose
+            losegame()
+        endcase
+        case game_lose2
+            if timer() => losealarm
+                if lives =< 0 then game_state = game_lose else dec lives,1 : game_state = game_start : playerupgrade = 0
+            endif
+            explosionanimation()
+            redraw()
+            drawscore()
+        endcase
+    endselect
+    sync
+    if scancode() = 183 and timer() => prtscrnalarm then screenie() : prtscrnalarm = timer() + prtscrnwait
+endwhile
+
+end
+
+// Initialization
+function init()
+    // Main Initialization
+    sync on
+    sync rate 60
+    hide mouse
+    set display mode 640,480,32
+    `disable escapekey
+    randomize timer()
+    
+    // Display an image while the game is loading.
+    set image colorkey 255,0,255
+    global background as integer : background = 1 : load image "background01.png",background
+    global img_dbproduct as integer : img_dbproduct = 1000 : load image "Dbproductions.png",img_dbproduct
+    global img_logo as integer : img_logo = 1001 : load image "spaceinvaders.png",img_logo
+    sprite background,0,0,background : sprite img_dbproduct,screen width()/2-234,screen height()/2-15,1000
+    global logoalpha1 as integer : logoalpha1 = 0
+    global logoalpha2 as integer : logoalpha2 = 0
+    global screenalarm as integer : screenalarm = timer()+500
+    global screenalarm1 as integer : screenalarm1 = timer()+5000
+    global fadestate1 as integer : fadestate1 = 1
+    global fadestate2 as integer : fadestate2 = 0
+
+    // Set up some variables
+    global swidth as integer : swidth = screen width()              `screen width
+    global sheight as integer : sheight = screen height()           `screen height
+    global halfswidth as integer : halfswidth = swidth/2            `half of the screen width
+    global halfsheight as integer : halfsheight = sheight/2         `half of the screen height
+    global levels as integer : read levels                          `number of levels
+    global level as integer : level = 1                             `Current level
+    global lvldatacnt as integer : read lvldatacnt                  `number of data items per level
+    global playerposxstart as integer : playerposxstart = halfswidth-16 `Starting position of player
+    global playerposx as integer : playerposx = halfswidth-16       `player's position (x)
+    global playerposy as integer : playerposy = sheight-80          `player's position (y)
+    global playerupgrade as integer : playerupgrade = 0             `upgrade identifier, 0, 1, 2
+    global lives as integer : lives = 3                             `lives
+    global score as integer : score = 0                             `Player's score
+    global monsterposxstart as integer : monsterposxstart = 177     `Starting position of monsters (x)
+    global monsterposystart as integer : monsterposystart = 70       `starting position of monsters (y)
+    global monsterposx as integer : monsterposx = monsterposxstart  `monster's position (x)
+    global monsterposy as integer : monsterposy = monsterposystart  `monster's position (y)
+    global ufoposy as integer : ufoposy = monsterposy - 50          `UFO's position (y)
+    global bonusposy as integer : bonusposy = monsterposy - 25      `Bonus 1 position (y)
+    global invadershoot as integer : invadershoot = 0               `which invader is currently shooting
+    global mouseclicked as integer : mouseclicked = 0               `1 if the mouse was clicked previously
+    global losepos as integer : losepos = sheight-130               `how far down the monster's move before player loses
+    global losewait as integer : losewait = 4000                    `how long to wait between ship exploding and player losing
+    global prtscrnwait as integer : prtscrnwait = 1500              `how long to wait between screen shots
+    global screenalarm2 as integer : screenalarm2 = 0               `an alarm to signal when the logo screen changes
+    global screenalarm3 as integer : screenalarm3 = 0               `an alarm to signal when the logo screen changes
+    global firealarm as integer : firealarm = 0                     `an alarm to signal if player can fire or not
+    global enemyfirealarm as integer : enemyfirealarm = 0           `an alarm to signal if enemies can fire or not.
+    global losealarm as integer : losealarm = 0                     `an alarm to signal enough time between ship exploding and player loser.
+    global framealarm as integer : framealarm = 0                   `an alarm to signal if the monster's animation frame is ready to be changed.
+    global prtscrnalarm as integer : prtscrnalarm = 0               `an alarm to signal when a screen shot can be made next.
+    global mousealarm as integer : mousealarm = 0                   `an alarm to signal if the mouse was pressed and let go.
+    global dim explodeanim(20)                                      `tell if an explosion is currently being animated
+    global dim bulletlife(20)                                       `an array to keep track of how many lives each bullet still has
+    
+    global dim levelinfo(levels,lvldatacnt)                         `An array which holds all distinguishing data between levels.
+    global monsterspeed as integer                                  `monster speed
+    global ufospeed as integer                                      `UFO's speed
+    global ufopos1 as integer                                       `A position offscreen in which, added to ufopos2 is the position which the ufo starts.
+    global ufopos2 as integer                                       `A random number to be added to ufopos1 to make up the position offscreen which the ufo starts.
+    global ufopos3 as integer                                       `A position offscreen in which, added to ufopos4 is the position at which the ufo will turn around
+    global ufopos4 as integer                                       `A random number to be added to ufopos3 to make up the position offscreen at which the ufo will turn around.
+    global bonusspeed as integer                                    `Bonus's speed
+    global bonuspos1 as integer                                     `A position offscreen in which, added to bounspos2 is the position which the bonus starts.
+    global bonuspos2 as integer                                     `A random number to be added to bonuspos1 to make up the position offscreen which the bonus starts.
+    global bonuspos3 as integer                                     `A position offscreen in which, added to bonuspos4 is the position at which the bonus will turn around
+    global bonuspos4 as integer                                     `A random number to be added to bonuspos3 to make up the position offscreen at which the ufo will turn around.
+    global firewait as integer                                      `How long to wait between firing.
+    global enemyfire1 as integer                                    `A number between 0 and enemyfire1 is randomly chosen to determine when the enemy will fire.
+    global enemyfire2 as integer                                    `If enemyfire1 is equal to this, the enemy fires.
+    global bonusposx as integer                                     `Bonus's position (x)
+    global ufoposx as integer                                       `UFO's position (x)
+    global currentbonus as integer                                  `Which bonus is available in this level
+    getlevelinfo()
+
+    // Missle Position Arrays
+    global dim playermissileposx(20)
+    global dim playermissileposy(20)
+    global dim powermissileposx(10)
+    global dim powermissileposy(10)
+    global dim invadermissileposx(20)
+    global dim invadermissileposy(20)
+    for i = 1 to 20
+        playermissileposy(i) = sheight-120
+        bulletlife(i)=3
+    next i
+    for i = 1 to 10
+        powermissileposy(i) = sheight-122
+    next i
+
+    // Load required images
+    global img_fighters as integer : img_fighters  = 100 : load image "fighters.png",img_fighters
+    global img_invaders as integer : img_invaders  = 101 : load image "invaderpieces.png",img_invaders
+    global img_missiles as integer : img_missiles  = 102 : load image "missiles.png",img_missiles
+    global img_play1 as integer    : img_play1    = 1002 : load image "play1.png",img_play1
+    global img_play2 as integer    : img_play2    = 1012 : load image "play2.png",img_play2
+    global img_help1 as integer    : img_help1    = 1003 : load image "help1.png",img_help1
+    global img_help2 as integer    : img_help2    = 1013 : load image "help2.png",img_help2
+    global img_credits1 as integer : img_credits1 = 1004 : load image "credits1.png",img_credits1
+    global img_credits2 as integer : img_credits2 = 1014 : load image "credits2.png",img_credits2
+    global img_exit1 as integer    : img_exit1    = 1005 : load image "exit1.png",img_exit1
+    global img_exit2 as integer    : img_exit2    = 1015 : load image "exit2.png",img_exit2
+
+    // Load required sounds
+    global snd_youwin as integer : snd_youwin = 1       : load sound "youwin.wav",snd_youwin
+    global snd_youlose as integer   : snd_youlose = 2   : load sound "youlose.wav",snd_youlose
+    global snd_explosion as integer : snd_explosion = 3 : load sound "snd_explosion2.wav",snd_explosion : set sound volume snd_explosion,90
+
+    // Load music
+    global bg_music as integer : bg_music = 1 : load music "hop2nextlvl.mp3",bg_music : loop music bg_music
+    
+    // Split up the tiled images starting with the fighters
+    paste image img_fighters,0,0
+    global img_fighter1 as integer : img_fighter1 = 2 : get image img_fighter1,0,0,32,32
+    global img_fighter2 as integer : img_fighter2 = 3 : get image img_fighter2,0,32,32,64
+    global img_fighter3 as integer : img_fighter3 = 4 : get image img_fighter3,0,64,32,96
+    cls
+    // Invaders - first form then second
+    paste image img_invaders,0,0
+    global img_invader1 as integer   : img_invader1   = 5  : get image img_invader1,0,0,24,24,0
+    global img_invader1_2 as integer : img_invader1_2 = 6  : get image img_invader1_2,24,0,48,24
+    global img_invader2 as integer   : img_invader2   = 7  : get image img_invader2,0,24,24,48
+    global img_invader2_2 as integer : img_invader2_2 = 8  : get image img_invader2_2,24,24,48,48
+    global img_invader3 as integer   : img_invader3   = 9  : get image img_invader3,0,48,24,72
+    global img_invader3_2 as integer : img_invader3_2 = 10 : get image img_invader3_2,24,48,48,72
+    global img_invader4 as integer   : img_invader4   = 11 : get image img_invader4,0,72,48,96     `UFO
+    cls
+    // Missiles
+    paste image img_missiles,0,0
+    global img_playermissile as integer : img_playermissile = 13 : get image img_playermissile,16,0,22,16
+    global img_enemymissile as integer  : img_enemymissile  = 14 : get image img_enemymissile,22,0,28,16
+    global img_powermissile as integer  : img_powermissile  = 15 : get image img_powermissile,8,0,16,16
+    global img_ufomissile as integer    : img_ufomissile   = 16  : get image img_ufomissile,0,0,8,16
+    cls
+    // Delete the now unneeded images
+    delete image img_fighters : img_fighters = 0
+    delete image img_invaders : img_invaders = 0
+    delete image img_missiles : img_missiles = 0
+    // Change game_state
+    game_state = game_logo
+endfunction
+
+// Display logos
+function logo()
+    if sprite exist(img_dbproduct) and fadestate1 = 1
+        inc logoalpha1,1
+        set sprite alpha img_dbproduct,logoalpha1
+        if logoalpha1 => 255 then fadestate1 = 0
+    endif
+    if sprite exist (img_dbproduct) and fadestate1 = 2
+        dec logoalpha1,1
+        set sprite alpha img_dbproduct,logoalpha1
+        if logoalpha1 =< 1 then fadestate1 = 0 : delete sprite img_dbproduct
+    endif
+    if sprite exist(img_logo) and fadestate2 = 1
+        inc logoalpha2,1
+        set sprite alpha img_logo,logoalpha2
+        if logoalpha2 => 255 then fadestate2 = 0
+    endif
+    if sprite exist(img_logo) and fadestate2 = 2
+        set sprite alpha img_logo,255
+        inc logopos2,5
+        sprite img_logo,swidth/2-234,logopos2,img_logo
+        if logopos2 => sheight-50 then fadestate2 = 3
+    endif
+    if sprite exist(img_logo) and fadestate2 = 3
+        dec logopos2,5
+        sprite img_logo,swidth/2-234,logopos2,img_logo
+        sprite img_play1,swidth/2-60,logopos2+50,img_play1
+        sprite img_help1,swidth/2-60,logopos2+100,img_help1
+        sprite img_credits1,swidth/2-90,logopos2+150,img_credits1
+        sprite img_exit1,swidth/2-60,logopos2+200,img_exit1
+        if logopos2 =< 50 then fadestate2 = 4
+    endif
+    if sprite exist(img_logo) and fadestate2 = 4
+        inc logopos2,5
+        sprite img_play1,swidth/2-60,logopos2+50,img_play1
+        sprite img_help1,swidth/2-60,logopos2+100,img_help1
+        sprite img_credits1,swidth/2-90,logopos2+150,img_credits1
+        sprite img_exit1,swidth/2-60,logopos2+200,img_exit1
+        if logopos2 => 100 then game_state = game_menu
+    endif
+    if screenalarm1 <> 0
+        if timer() => screenalarm1 or (timer() => screenalarm and (spacekey() or mouseclick()))
+            sprite img_logo,screen width()/2-234,screen height()/2-15,img_logo : set sprite alpha img_logo,logoalpha2
+            screenalarm2 = timer()+500
+            screenalarm3 = timer()+5000
+            screenalarm = 0
+            screenalarm1 = 0
+            fadestate1 = 2
+            fadestate2 = 1
+        endif
+    endif
+    if screenalarm3 <> 0
+        if timer() => screenalarm3 or (timer() => screenalarm2 and (spacekey() or mouseclick()))
+            if sprite exist(img_dbproduct) then delete sprite img_dbproduct
+            screenalarm2 = 0
+            screenalarm3 = 0
+            fadestate2 = 2
+            global logopos2 as integer : logopos2 = sheight/2-15
+        endif
+    endif
+endfunction
+
+// Menu
+function menu()
+    show mouse
+    select menu_state
+        case menu_main
+            mainmenu()
+        endcase
+        case menu_help
+            help()
+        endcase
+        case menu_credits
+            credits()
+        endcase
+    endselect
+endfunction
+
+// Main Menu
+function mainmenu()
+    paste image background,0,0
+    sprite img_logo,swidth/2-234,50,img_logo
+    sprite img_play1,swidth/2-60,150,img_play1
+    sprite img_help1,swidth/2-60,200,img_help1
+    sprite img_credits1,swidth/2-90,250,img_credits1
+    sprite img_exit1,swidth/2-60,300,img_exit1
+    if mousex() > sprite x(img_play1) and mousex() < sprite x(img_play1)+sprite width(img_play1) and mousey() > sprite y(img_play1) and mousey() < sprite y(img_play1)+sprite height(img_play1)
+        selection = select_play
+        if mouseclick() then mousealarm=timer()+2000 : mouseclicked = 1
+        if mouseclick() = 0 and timer() =< mousealarm and mouseclicked = 1
+            game_state = game_start
+            mousealarm = 0
+            mouseclicked = 0
+        endif
+        if mouseclick() and timer() => mousealarm and mouseclicked = 1 then mouseclicked = 0
+    endif
+    if mousex() > sprite x(img_help1) and mousex() < sprite x(img_help1)+sprite width(img_help1) and mousey() > sprite y(img_help1) and mousey() < sprite y(img_help1)+sprite height(img_help1)
+        selection = select_help
+        if mouseclick() then mousealarm=timer()+2000 : mouseclicked = 1
+        if mouseclick() = 0 and timer() =< mousealarm and mouseclicked = 1
+            menu_state = menu_help
+            mousealarm = 0
+            mouseclicked = 0
+        endif
+        if mouseclick() and timer() => mousealarm and mouseclicked = 1 then mouseclicked = 0
+    endif
+    if mousex() > sprite x(img_credits1) and mousex() < sprite x(img_credits1)+sprite width(img_credits1) and mousey() > sprite y(img_credits1) and mousey() < sprite y(img_credits1)+sprite height(img_credits1)
+        selection = select_credits
+        if mouseclick() then mousealarm=timer()+2000 : mouseclicked = 1
+        if mouseclick() = 0 and timer() =< mousealarm and mouseclicked = 1
+            menu_state = menu_credits
+            mousealarm = 0
+            mouseclicked = 0
+        endif
+        if mouseclick() and timer() => mousealarm and mouseclicked = 1 then mouseclicked = 0
+    endif
+    if mousex() > sprite x(img_exit1) and mousex() < sprite x(img_exit1)+sprite width(img_exit1) and mousey() > sprite y(img_exit1) and mousey() < sprite y(img_exit1)+sprite height(img_exit1)
+        selection = select_exit
+        if mouseclick() then mousealarm=timer()+2000 : mouseclicked = 1
+        if mouseclick() = 0 and timer() =< mousealarm and mouseclicked = 1
+            game_state = game_exit
+            mousealarm = 0
+            mouseclicked = 0
+        endif
+        if mouseclick() and timer() => mousealarm and mouseclicked = 1 then mouseclicked = 0
+    endif
+    set sprite image img_play1,img_play1
+    set sprite image img_help1,img_help1
+    set sprite image img_credits1,img_credits1
+    set sprite image img_exit1,img_exit1
+    select selection
+        case select_play
+            set sprite image img_play1,img_play2
+        endcase
+        case select_help
+            set sprite image img_help1,img_help2
+        endcase
+        case select_credits
+            set sprite image img_credits1,img_credits2
+        endcase
+        case select_exit
+            set sprite image img_exit1,img_exit2
+        endcase
+    endselect
+endfunction
+
+// Help
+function help()
+    deletesprites()
+    cls
+    paste image background,0,0
+    set text font "Arial"
+    set text size 30
+    set text to bold
+    center text swidth/2,25,"--DBRemake: Space Invaders--"
+    set text size 20
+    center text swidth/2,65,"HELP FILE"
+    set text size 18
+    set text to italic
+    text 125,100,"Controls"
+    set text size 16
+    set text to normal
+    text 125,115,"Arrowkeys - Move Your Fighter"
+    text 125,130,"Spacebar - Shoot Enemies"
+    text 125,145,"Escape key - Pause Menu"
+    text 125,175,"Many Years Ago, Mother Earth and the earthlings were threatened"
+    text 125,190,"to be invaded by Aliens who call themselves the Space Invaders."
+    text 125,205,"These Space Invaders were of three species, all of which are from"
+    text 125,220,"a planet which goes by the name Febreeze, for the planet's scent."
+    text 125,235,"Your mission is to destroy all the waves of invaders, to protect"
+    text 125,250,"Mother Earth and all the earthlings.  Should you fail, however,"
+    text 125,265,"the consequences could be disasterous"
+    sync
+    if spacekey() then menu_state = menu_main
+    if mouseclick() then mousealarm=timer()+2000 : mouseclicked = 1
+    if mouseclick() = 0 and timer() =< mousealarm and mouseclicked = 1
+        menu_state = menu_main
+        mousealarm = 0
+        mouseclicked = 0
+    endif
+    if mouseclick() and timer() => mousealarm and mouseclicked = 1 then mouseclicked = 0
+endfunction
+
+// Credits
+function credits()
+    deletesprites()
+    cls
+    paste image background,0,0
+    set text font "Arial"
+    set text size 30
+    set text to bold
+    center text swidth/2,25,"--DBRemake: Space Invaders--"
+    set text size 20
+    center text swidth/2,65,"CREDITS"
+    set text size 18
+    set text to italic
+    center text swidth/2,100,"Sprites"
+    center text swidth/2,170,"Fonts"
+    center text swidth/2,285,"Programming"
+    set text size 16
+    set text to normal
+    center text swidth/2,115,"Thanks to David Gervais for all the sprites"
+    center text swidth/2,130,"he provided on thegamecreators.com"
+    center text swidth/2,185,"Some fonts were found on dafont.com, including"
+    center text swidth/2,200,"Ethnocentric by Larabie Fonts"
+    center text swidth/2,215,"Spaceman by Factor"
+    center text swidth/2,230,"BM Space by BitmapMania"
+    center text swidth/2,245,"I also used the Arial font which comes with Windows."
+    center text swidth/2,300,"All programming was done by Marcus Johnson AKA Dbproguy"
+    sync
+    if spacekey() then menu_state = menu_main
+    if mouseclick() then mousealarm=timer()+2000 : mouseclicked = 1
+    if mouseclick() = 0 and timer() =< mousealarm and mouseclicked = 1
+        menu_state = menu_main
+        mousealarm = 0
+        mouseclicked = 0
+    endif
+    if mouseclick() and timer() => mousealarm and mouseclicked = 1 then mouseclicked = 0
+endfunction
+
+// Get ready to start the game.
+function startgame()
+    deletesprites()
+    cls
+    readlevelinfo()
+    
+    // Pre-game variables
+    global i1 as integer = img_invader1
+    global i2 as integer = img_invader2
+    global i3 as integer = img_invader3
+    global img_fighter = img_fighter1
+    global spr_fighter as integer = 2
+    global spr_ufo as integer = 3
+    global spr_bonus as integer = 4
+    
+    // Set some variables
+    monsterposx = monsterposxstart
+    monsterposy = monsterposystart
+    playerposx = playerposxstart
+    
+    // Start music if it's not already started
+    if not music playing(bg_music) then play music bg_music
+
+    // Draw sprites out of the images
+    paste image background,0,0
+    sprite spr_fighter,playerposx,playerposy,img_fighter1 : rotate sprite spr_fighter,270
+    drawinvaders()
+    drawbonus()
+    // Change game state
+    game_state = game_run
+endfunction
+
+// The real game play
+function gameplay()
+    // Input
+    controls()
+    shooting()
+    // A.I.
+    movebonus()
+    movemonsters()
+    monstershoot()
+    // Control Bullets/death
+    bullets()
+    bulletcheck()
+    killmonsters()
+    getbonus()
+    monstermissiles()
+    invaderbulletcheck()
+    killplayer()
+    // Keep explosions going
+    explosionanimation()
+    // Redraw everything
+    redraw()
+    drawscore()
+    // Check if player has won or lost this round
+    checkwin()
+    checklose()
+endfunction

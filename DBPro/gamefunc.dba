@@ -1,0 +1,586 @@
+// Inform the player that he/she is a loser.
+function losegame()
+    deletesprites()
+    cls
+    paste image background,0,0
+    set text size 50
+    center text halfswidth,halfsheight,"YOU LOSE"
+    if sound playing(snd_explosion) then stop sound snd_explosion
+    if music playing(bg_music) then stop music bg_music
+    play sound snd_youlose
+    sync
+    wait 5000
+    score = 0
+    lives = 3
+    level = 1
+    game_state = game_start
+endfunction
+
+function wingame()
+    deletesprites()
+    cls
+    paste image background,0,0
+    set text size 50
+    center text halfswidth,halfsheight,"YOU WIN"
+    if sound playing(snd_explosion) then stop sound snd_explosion
+    if music playing(bg_music) then stop music bg_music
+    play sound snd_youwin
+    sync
+    wait 5000
+    score = 0
+    lives = 3
+    level = 1
+    game_state = game_start
+endfunction
+
+// Controls
+function controls()
+    if keystate(183) and timer() => prtscrnalarm then screenie() : prtscrnalarm = timer() + prtscrnwait
+    if leftkey() then dec playerposx,1
+    if rightkey() then inc playerposx,1
+    if playerposx < 0 then playerposx = 0
+    if playerposx > swidth-32 then playerposx = swidth-32
+endfunction
+
+// Shooting
+function shooting()
+    if spacekey() and timer() => firealarm
+        select playerupgrade
+            case 0
+                for i = 1 to 10
+                    spritenum = 100+i
+                    if sprite exist(spritenum) = 0
+                        playermissileposx(i) = playerposx+13
+                        sprite spritenum,playermissileposx(i),playermissileposy(i),img_playermissile
+                        i = 11
+                        firealarm = timer()+firewait
+                    endif
+                next i
+            endcase
+            case 1
+                for i = 1 to 19
+                    spritenum = 100+i
+                    if sprite exist(spritenum) = 0 and sprite exist(spritenum+1) = 0
+                        playermissileposx(i) = playerposx
+                        playermissileposx(i+1) = playerposx+26
+                        sprite spritenum,playermissileposx(i),playermissileposy(i),img_playermissile
+                        inc spritenum,1
+                        inc i,1
+                        sprite spritenum,playermissileposx(i),playermissileposy(i),img_playermissile
+                        i = 21
+                        firealarm = timer()+firewait
+                    endif
+                next i
+            endcase
+            case 2
+                for i = 1 to 10
+                    spritenum = 400+i
+                    if sprite exist(spritenum) = 0
+                        powermissileposx(i) = playerposx+13
+                        sprite spritenum,powermissileposx(i),powermissileposy(i),img_powermissile
+                        i = 11
+                        firealarm = timer()+firewait
+                    endif
+                next i
+            endcase
+        endselect
+    endif
+endfunction
+
+// Move existing bullets
+function bullets()
+    for i = 1 to 20
+        spritenum = 100+i
+        if sprite exist(spritenum) then dec playermissileposy(i),1
+        spritenum = 400+i
+        if sprite exist(spritenum) then dec powermissileposy(i),1
+    next i
+endfunction
+
+// Check if bullets are off the screen
+function bulletcheck()
+    for i = 1 to 20
+        spritenum = 100+i
+        if sprite exist(spritenum)
+            if sprite x(spritenum) < -16 or sprite x(spritenum) > swidth+16
+                delete sprite spritenum
+                playermissileposy(i) = sheight-120
+            endif
+            if sprite y(spritenum) < -16 or sprite y(spritenum) > sheight+16
+                delete sprite spritenum
+                playermissileposy(i) = sheight-120
+            endif
+        endif
+    next i
+    for i = 1 to 10
+        spritenum = 400+i
+        if sprite exist(spritenum)
+            if sprite y(spritenum) < -16 or sprite y(spritenum) > sheight+16
+                delete sprite spritenum
+                powermissileposy(i) = sheight-122
+                bulletlife(i)=3
+            endif
+        endif
+    next i
+endfunction
+
+// Kill monsters when shot
+function killmonsters()
+    for i = 1 to 20
+            spritenum = 100+i
+            if sprite exist(spritenum)
+                for j = 1100 to 1510
+                    if sprite exist(j)
+                        if sprite collision(spritenum,j)
+                            if sprite hit(spritenum,j)
+                                for k = 1 to 20
+                                    if explodeanim(k)=0
+                                        explodenum = 300+k
+                                        create animated sprite explodenum,"explosion.png",16,1,explodenum
+                                        sprite explodenum,sprite x(j),sprite y(j),explodenum
+                                        play sound snd_explosion
+                                        explodeanim(k)=1
+                                        play sprite explodenum,1,16,60
+                                        k = 21
+                                    endif
+                                next k
+                                delete sprite spritenum
+                                delete sprite j
+                                if j => 1100 and j < 1200 then inc score,10
+                                if j => 1200 and j < 1400 then inc score,5
+                                if j => 1400 and j < 1600 then inc score,3
+                                playermissileposy(i)=sheight-120 
+                                j = 1511
+                            endif
+                        endif
+                    endif
+                next j
+            endif
+            if sprite exist(spritenum)
+                if sprite exist(spr_ufo)
+                    if sprite collision(spritenum,spr_ufo)
+                        if sprite hit(spritenum,spr_ufo)
+                            for k = 1 to 20
+                                if explodeanim(k) = 0
+                                    explodenum = 300+k
+                                    create animated sprite explodenum,"explosion.png",16,1,explodenum
+                                    sprite explodenum,sprite x(spr_ufo),sprite y(spr_ufo),explodenum
+                                    play sound snd_explosion
+                                    explodeanim(k)=1
+                                    play sprite explodenum,1,16,60
+                                    k = 21
+                                    inc score,50
+                                endif
+                            next k
+                            delete sprite spritenum
+                            delete sprite spr_ufo
+                            playermissileposy(i)=sheight-120
+                        endif
+                    endif
+                endif
+            endif
+    next i
+    for i = 1 to 10
+            spritenum = 400+i
+            if sprite exist(spritenum)
+                for j = 1100 to 1510
+                    if sprite exist(j)
+                        if sprite collision(spritenum,j)
+                            if sprite hit(spritenum,j)
+                                for k = 1 to 20
+                                    if explodeanim(k)=0
+                                        explodenum = 300+k
+                                        create animated sprite explodenum,"explosion.png",16,1,explodenum
+                                        sprite explodenum,sprite x(j),sprite y(j),explodenum
+                                        play sound snd_explosion
+                                        explodeanim(k)=1
+                                        play sprite explodenum,1,16,60
+                                        k = 21
+                                        dec bulletlife(i),1
+                                        if bulletlife(i)=<0
+                                            delete sprite spritenum
+                                            powermissileposy(i)=sheight-122
+                                            bulletlife(i)=3
+                                        endif
+                                    endif
+                                next k
+                                delete sprite j
+                                if j => 1100 and j < 1200 then inc score,10
+                                if j => 1200 and j < 1400 then inc score,5
+                                if j => 1400 and j < 1600 then inc score,3
+                                j = 1511
+                            endif
+                        endif
+                    endif
+                next j
+            endif
+            if sprite exist(spritenum)
+                if sprite exist(spr_ufo)
+                    if sprite collision(spritenum,spr_ufo)
+                        if sprite hit(spritenum,spr_ufo)
+                            for k = 1 to 20
+                                if explodeanim(k) = 0
+                                    explodenum = 300+k
+                                    create animated sprite explodenum,"explosion.png",16,1,explodenum
+                                    sprite explodenum,sprite x(spr_ufo),sprite y(spr_ufo),explodenum
+                                    play sound snd_explosion
+                                    explodeanim(k)=1
+                                    play sprite explodenum,1,16,60
+                                    k = 21
+                                    inc score,50
+                                    dec bulletlife(i),1
+                                    if bulletlife(i)=<0
+                                        delete sprite spritenum
+                                        powermissileposy(i)=sheight-122
+                                        bulletlife(i)=3
+                                    endif
+                                    delete sprite spr_ufo
+                                endif
+                            next k
+                        endif
+                    endif
+                endif
+            endif
+    next i
+endfunction
+
+// Grab bonus
+function getbonus()
+    for i = 1 to 20
+        spritenum = 100+i
+        if sprite exist(spritenum)
+            if sprite exist(spr_bonus)
+                if sprite collision(spritenum,spr_bonus)
+                    if sprite hit(spritenum,spr_bonus)
+                        for k = 1 to 20
+                            if explodeanim(k) = 0
+                                explodenum = 300+k
+                                create animated sprite explodenum,"explosion.png",16,1,explodenum
+                                sprite explodenum,sprite x(spr_bonus),sprite y(spr_bonus),explodenum
+                                play sound snd_explosion
+                                explodeanim(k)=1
+                                play sprite explodenum,1,16,60
+                                k = 11
+                                inc score,100
+                                playerupgrade = currentbonus
+                            endif
+                        next k
+                        delete sprite spritenum
+                        delete sprite spr_bonus
+                        playermissileposy(i)=sheight-120
+                    endif
+                endif
+            endif
+        endif
+    next i
+endfunction
+
+// Play explosion animation
+function explosionanimation()
+    for i = 1 to 20
+        explodenum = 300+i
+        if explodeanim(i) > 0 and sprite exist(explodenum)
+            play sprite explodenum,1,16,60
+        endif
+        if sprite exist(explodenum)
+            if sprite frame(explodenum) >= 16
+                explodeanim(i)  =0
+                delete sprite explodenum
+            endif
+        endif
+    next i
+endfunction
+
+// Check the position of the monster and do what is needed
+function movemonsters()
+    for i = 0 to 10
+        if sprite exist(i+1100)
+            if sprite x(i+1100) > swidth-24 or sprite x(i+1100) < 0 then monsterspeed=-monsterspeed : inc monsterposy,13 : i = 11
+        endif
+        if sprite exist(i+1200)
+            if sprite x(i+1200) > swidth-24 or sprite x(i+1200) < 0 then monsterspeed=-monsterspeed : inc monsterposy,13 : i = 11
+        endif
+        if sprite exist(i+1300)
+            if sprite x(i+1300) > swidth-24 or sprite x(i+1300) < 0 then monsterspeed=-monsterspeed : inc monsterposy,13 : i = 11
+        endif
+        if sprite exist(i+1400)
+            if sprite x(i+1400) > swidth-24 or sprite x(i+1400) < 0 then monsterspeed=-monsterspeed : inc monsterposy,13 : i = 11
+        endif
+        if sprite exist(i+1500)
+            if sprite x(i+1500) > swidth-24 or sprite x(i+1500) < 0 then monsterspeed=-monsterspeed : inc monsterposy,13 : i = 11
+        endif
+    next i
+    if sprite exist (spr_ufo)
+        if sprite x(spr_ufo) > swidth+ufopos3+rnd(ufopos4) or sprite x(spr_ufo) < -ufopos3-rnd(ufopos4) then ufospeed=-ufospeed
+    endif
+    inc monsterposx,monsterspeed
+    inc ufoposx,ufospeed
+endfunction
+
+// Move bonus
+function movebonus()
+    if sprite exist(spr_bonus)
+        if sprite x(spr_bonus) > swidth+bonuspos3+rnd(bonuspos4) or sprite x(spr_bonus) < -bonuspos3-rnd(bonuspos4) then bonusspeed=-bonusspeed : rotate sprite spr_bonus,180
+    endif
+    inc bonusposx,bonusspeed
+endfunction
+
+// Make the monster's shoot
+function monstershoot()
+    for i = 0 to 10
+        if sprite exist(i+1100)
+            if rnd(enemyfire1) = enemyfire2 then invadershoot = i+1100 : i = 11
+        endif
+        if sprite exist(i+1200)
+            if rnd(enemyfire1) = enemyfire2 then invadershoot = i+1200 : i = 11
+        endif
+        if sprite exist(i+1300)
+            if rnd(enemyfire1) = enemyfire2 then invadershoot = i+1300 : i = 11
+        endif
+        if sprite exist(i+1400)
+            if rnd(enemyfire1) = enemyfire2 then invadershoot = i+1400 : i = 11
+        endif
+        if sprite exist(i+1500)
+            if rnd(enemyfire1) = enemyfire2 then invadershoot = i+1500 : i = 11
+        endif
+    next i
+    if invadershoot = 0 and sprite exist(spr_ufo) and rnd(100) = 54 then invadershoot = spr_ufo
+    if invadershoot > 0 and timer() => enemyfirealarm
+        for i = 1 to 20
+            spritenum=200+i
+            if sprite exist(spritenum) = 0 and sprite exist(invadershoot) = 1
+                invadermissileposx(i)=sprite x(invadershoot)+13
+                invadermissileposy(i)=sprite y(invadershoot)+24
+                sprite spritenum,invadermissileposx(i),invadermissileposy(i),img_enemymissile
+                i = 11
+                enemyfirealarm = timer()+500
+            endif
+        next i
+    endif
+    invadershoot = 0
+endfunction
+
+// Move the monster's missiles
+function monstermissiles()
+    for i = 1 to 20
+        spritenum = 200+i
+        if sprite exist(spritenum) then inc invadermissileposy(i),1
+    next i
+endfunction
+
+// Check if enemy missiles are off the screen
+function invaderbulletcheck()
+    for i = 1 to 20
+        spritenum = 200+i
+        if sprite exist(spritenum)
+            if sprite x(spritenum) < -16 or sprite x(spritenum) > swidth+16
+                delete sprite spritenum
+                invadermissileposy(i) = sheight-120
+            endif
+        endif
+        if sprite exist(spritenum)
+            if sprite y(spritenum) < -16 or sprite y(spritenum) > sheight+16
+                delete sprite spritenum
+                invadermissileposy(i) = sheight-120
+            endif
+        endif
+    next i
+endfunction
+
+// Kill the player if an enemy missile hits him.
+function killplayer()
+    for i = 1 to 20
+        spritenum=200+i
+        if sprite exist(spritenum) and sprite exist(spr_fighter)
+            if sprite collision(spritenum,spr_fighter)
+                if sprite hit(spritenum,spr_fighter)
+                    for k = 1 to 10
+                        if explodeanim(k)=0
+                            explodenum = 300+k
+                            create animated sprite explodenum,"explosion.png",16,1,explodenum
+                            sprite explodenum,sprite x(spr_fighter),sprite y(spr_fighter)-24,explodenum
+                            play sound snd_explosion
+                            explodeanim(k)=1
+                            play sprite explodenum,1,16,60
+                            delete sprite spr_fighter
+                            deletebullets()
+                            losealarm = timer()+losewait
+                            game_state = game_lose2
+                            i = 11
+                            k = 11
+                        endif
+                    next k
+                endif
+            endif
+        endif
+    next i
+endfunction
+
+function checkwin()
+    win = 1
+    for i = 0 to 10
+        if sprite exist(i+1100) then win = 0 : i = 10
+        if sprite exist(i+1200) then win = 0 : i = 10
+        if sprite exist(i+1300) then win = 0 : i = 10
+        if sprite exist(i+1400) then win = 0 : i = 10
+        if sprite exist(i+1500) then win = 0 : i = 10
+    next i
+    if win = 1 then advancelevel()
+endfunction
+
+// Check the position of the monsters to see if player lost
+function checklose()
+    for h = 1100 to 1500
+        for i = 0 to 10
+            if sprite exist(i+h) and sprite exist(spr_fighter)
+                if sprite collision(spr_fighter,h+i)
+                    if sprite hit(spr_fighter,h+i)
+                        for k = 1 to 10
+                            if explodeanim(k)=0
+                                explodenum = 300+k
+                                create animated sprite explodenum,"explosion.png",16,1,explodenum
+                                sprite explodenum,sprite x(spr_fighter),sprite y(spr_fighter)-24,explodenum
+                                play sound snd_explosion
+                                explodeanim(k)=1
+                                play sprite explodenum,1,16,60
+                                delete sprite spr_fighter
+                                deletebullets()
+                                losealarm = timer()+losewait
+                                game_state = game_lose2
+                                i = 11
+                                k = 11
+                            endif
+                        next k
+                    endif
+                endif
+            endif
+        next i
+    next h
+endfunction
+
+// Redraw the sprites (to make them appearing to move in the screen)
+function redraw()
+    // Background first
+    paste image background,0,0
+    // Check what frame to use
+    if timer() => framealarm and i1 = img_invader1 then i1 = img_invader1_2 : i2 = img_invader2_2 : i3 = img_invader3_2 : framealarm = timer()+500
+    if timer() => framealarm and i1 = img_invader1_2 then i1 = img_invader1 : i2 = img_invader2 : i3 = img_invader3 : framealarm = timer()+500 
+    // Invaders
+    for i = 0 to 10
+        if sprite exist(i+1100) then sprite i+1100,monsterposx+i*26,monsterposy,i1       ` Top Row
+        if sprite exist(i+1200) then sprite i+1200,monsterposx+i*26,monsterposy+26,i2    `Second Row
+        if sprite exist(i+1300) then sprite i+1300,monsterposx+i*26,monsterposy+52,i2    `Third Row
+        if sprite exist(i+1400) then sprite i+1400,monsterposx+i*26,monsterposy+78,i3    `Fourth Row
+        if sprite exist(i+1500) then sprite i+1500,monsterposx+i*26,monsterposy+104,i3   `Bottom Row
+    next i
+    // Missiles
+    for i = 1 to 20
+        spritenum = 100+i
+        if sprite exist(spritenum) then sprite spritenum,playermissileposx(i),playermissileposy(i),img_playermissile
+        spritenum = 200+i
+        if sprite exist(spritenum) then sprite spritenum,invadermissileposx(i),invadermissileposy(i),img_enemymissile
+        spritenum = 400+i
+        if sprite exist(spritenum) then sprite spritenum,powermissileposx(i),powermissileposy(i),img_powermissile
+    next i
+    if sprite exist(spr_ufo) then sprite spr_ufo,ufoposx,ufoposy,img_invader4
+    if sprite exist(spr_bonus) then sprite spr_bonus,bonusposx,bonusposy,img_fighter2 `: scale sprite spr_bonus,50
+    if playerupgrade = 0 then img_fighter = img_fighter1
+    if playerupgrade = 1 then img_fighter = img_fighter2
+    if playerupgrade = 2 then img_fighter = img_fighter3
+    if sprite exist(spr_fighter) then sprite spr_fighter,playerposx,playerposy,img_fighter : rotate sprite spr_fighter,270
+
+endfunction
+
+function drawscore()
+    set text size 25
+    text 0,0,"SCORE "+str$(score)
+    text 0,sheight-20,"LIVES "
+    for i = 1 to lives
+        sprite 3000+i,20+26*i,sheight,img_fighter1 : rotate sprite 3000+i,270 : scale sprite 3000+i,75
+    next i
+endfunction
+
+function advancelevel()
+    deletesprites()
+    if level => levels
+        wingame()
+    else
+        inc level
+        game_state = game_start
+    endif
+    playerupgrade = 0
+endfunction
+
+// Delete bullets
+function deletebullets()
+    for i = 1 to 20
+        spritenum = 100+i
+        if sprite exist(spritenum) then delete sprite spritenum : playermissileposy(i) = sheight - 120
+        spritenum = 200+i
+        if sprite exist(spritenum) then delete sprite spritenum
+    next i
+    for i = 1 to 10
+    spritenum = 400+i
+        if sprite exist(spritenum) then delete sprite spritenum : playermissileposy(i) = sheight - 120
+    next i
+endfunction
+
+// Draw Invaders.
+function drawinvaders()
+    for i = 0 to 10
+        sprite i+1100,monsterposx+i*26,monsterposy,img_invader1       ` Top Row
+        sprite i+1200,monsterposx+i*26,monsterposy+26,img_invader2    `Second Row
+        sprite i+1300,monsterposx+i*26,monsterposy+52,img_invader2    `Third Row
+        sprite i+1400,monsterposx+i*26,monsterposy+78,img_invader3    `Fourth Row
+        sprite i+1500,monsterposx+i*26,monsterposy+104,img_invader3   `Bottom Row
+    next i
+    sprite spr_ufo,ufoposx,ufoposy,img_invader4
+endfunction
+
+// Draw bonuses.
+function drawbonus()
+    if currentbonus = 1 then img_bonus = img_fighter2
+    if currentbonus = 2 then img_bonus = img_fighter3
+    sprite spr_bonus,bonusposx,bonusposy,img_bonus : scale sprite spr_bonus,50
+endfunction
+
+function getlevelinfo()
+    for i = 1 to levels
+        for j = 1 to lvldatacnt
+            read levelinfo(i,j)
+        next j
+    next i
+endfunction
+
+function readlevelinfo()
+    monsterspeed = levelinfo(level,1)
+    ufospeed = levelinfo(level,2)
+    ufopos1 = levelinfo(level,3)
+    ufopos2 = levelinfo(level,4)
+    ufopos3 = levelinfo(level,5)
+    ufopos4 = levelinfo(level,6)
+    bonusspeed = levelinfo(level,7)
+    bonuspos1 = levelinfo(level,8)
+    bonuspos2 = levelinfo(level,9)
+    bonuspos3 = levelinfo(level,10)
+    bonuspos4 = levelinfo(level,11)
+    firewait = levelinfo(level,12)
+    enemyfire1 = levelinfo(level,13)
+    enemyfire2 = levelinfo(level,14)
+    
+    ufoposx = -ufopos1-rnd(ufopos2)
+    bonusposx = -bonuspos1 - rnd(bonuspos2)
+    currentbonus = rnd(1) + 1
+`    currentbonus = 2
+endfunction
+
+// Delete uneeded sprites
+function deletesprites()
+    deletebullets()
+    for i = 1 to 10
+        explodeanim(i)=0
+    next i
+    for i = 1 to 10000
+        if sprite exist(i) then delete sprite i
+    next i
+endfunction

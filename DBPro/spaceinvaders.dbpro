@@ -1,0 +1,76 @@
+version=DBP1.00
+;****DarkBASIC Professional Project****
+;[Created by BLUE IDE - Version 2.0.22a]
+;Basic project details
+project name=DBRemake: Space Invaders
+project comments=
+;
+;Files
+final source=_Temp.dbsource
+main=main.dba
+include1=gamefunc.dba
+include2=level.dba
+include3=screenshot.dba
+executable=spaceinvaders.exe
+build type=media
+ 
+;Debug Mode YES/NO
+CLI=NO
+ 
+;====Media Settings====
+compression=NO
+encryption=NO
+media root path=F:\~Marcus\Programming\Projects\DarkBASIC Pro\Space Invaders\
+ 
+;====Included Media====
+media1=background01.png
+media2=Dbproductions.png
+media3=explosion.png
+media4=fighters.png
+media5=hop2nextlvl.mp3
+media6=invaderpieces.png
+media7=missiles.png
+media8=snd_explosion2.wav
+media9=spaceinvaders.png
+media10=youlose.wav
+media11=play1.png
+media12=credits1.png
+media13=help1.png
+media14=exit1.png
+media15=credits2.png
+media16=exit2.png
+media17=help2.png
+media18=play2.png
+media19=youwin.wav
+ 
+;> Cursors
+ 
+;> Icons
+ 
+;====Other Settings====
+app title=DBRemake: Space Invaders
+graphics mode=fulldesktop
+fullscreen resolution=640x480x32
+window resolution=640x480
+compression=NO
+encryption=NO
+ 
+;====Version Information====
+vercomments=
+vercompany=Dbproguy Productions
+vercopyright=
+verfiledesc=
+verfilename=
+verfilenumber=
+verinternal=v1.0
+verproduct=
+verproductnumber=v1.0
+vertrademark=
+ 
+;====Project Organization====
+ 
+;====Config/setup.ini values====
+RemoveSafetyCode=NO
+SafeArrays=YES
+LocalTempFolder=NO
+ExternaliseDLLS=NO

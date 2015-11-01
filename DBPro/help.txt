@@ -1,0 +1,13 @@
+20 c -DBRemake: Space Invaders- br
+14 c HELP FILE br
+12 l br
+12 l Controls br
+10 l br
+10 l Arrowkeys - Move br
+10 l Spacebar - Shoot br
+10 l Escape key - Pause Menu br
+12 l br
+12 l Many Years Ago, Mother Earth and the earthlings were threatened br
+12 l to be invaded by Aliens who call themselves the Space Invaders. br
+12 l These Space Invaders were of three species, all of them from a br
+12 l planet which goes by the name  br

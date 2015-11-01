@@ -1,0 +1,55 @@
+REM Screenshots ..:::.. internal use only ..:::.. by Dbproguy-Marcus Johnson
+
+type SpriteData
+    number as integer
+    priority as integer
+endtype
+
+function screenie()
+    local extension as string = ".bmp"
+    if path exist("Screenies") = 0 then make directory "Screenies"
+    number = 1
+    filename$ = "Screenies/screenshot_"
+    
+    repeat
+        if number < 10 then filename2$ = filename$ + "0000" + str$(number) + extension
+        if number => 10 and number < 100 then filename2$ = filename$ + "000" + str$(number) + extension
+        if number => 100 and number < 1000 then filename2$ = filename$ + "00" + str$(number) + extension
+        if number => 1000 and number < 10000 then filename2$ = filename$ + "0" + str$(number) + extension
+        if number => 10000 and number < 100000 then filename2$ = filename$ + str$(number) + extension
+        inc number
+    until file exist(filename2$) = 0
+    filename$ = filename2$
+   
+    local dim sprites(-1) as SpriteData
+    maxpriority = 0
+    for i = 1 TO 65536
+        if sprite exist(i) = 1
+            if sprite visible(i) = 1
+                array insert at bottom sprites(0)
+                index = array count(sprites(0))
+                priority = sprite priority(i)
+                sprites(index).number = i
+                sprites(index).priority = priority
+                if priority > maxpriority then maxpriority = priority
+            endif
+        endif
+    next i
+   
+    priority = 0
+    while array count(sprites(0)) > -1 and priority <= maxpriority
+        for i = 0 to array count(sprites(0))
+            if sprites(i).priority = priority
+                number = sprites(i).number
+                if number > 0 then paste sprite number,sprite x(number),sprite y(number)
+                array delete element sprites(0),i
+                dec i
+            endif
+        next i
+        inc priority
+    endwhile
+   
+    get image 65536,0,0,screen width(),screen height(),3
+    save image filename$,65536
+    delete image 65536
+endfunction
