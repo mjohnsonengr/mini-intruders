@@ -3,3 +3,4 @@ bower_components/
 node_modules/
 wwwroot/js/
 wwwroot/libs/
+tscommand-*.tmp.txt
