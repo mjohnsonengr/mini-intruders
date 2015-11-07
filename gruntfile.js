@@ -21,13 +21,16 @@ module.exports = function (grunt) {
             })
         }, 'Usage')
 
-        register('prepare', ["copy:prepare"], 'Prepare for deployment -- only needed once to copy libs to wwwroot');
-        register('run', ['connect', 'open', 'watch'], "");
+        register('prepare', ["copy:prepare", "symlink:prepare"],
+            'Prepare for development -- only needed once to copy libs and create a src symlink in wwwroot');
+        register('run', ['connect', 'open', 'watch'],
+            "Run the dev server and watch for TS file changes; also opens browser");
     }
 
     function loadTasks() {
         grunt.loadNpmTasks('grunt-contrib-connect');
         grunt.loadNpmTasks('grunt-contrib-copy');
+        grunt.loadNpmTasks('grunt-contrib-symlink');
         grunt.loadNpmTasks('grunt-contrib-watch');
         grunt.loadNpmTasks('grunt-open');
         grunt.loadNpmTasks('grunt-ts');
@@ -60,6 +63,14 @@ module.exports = function (grunt) {
         open: {
             dev: {
                 path: 'http://localhost:8080/index.html'
+            }
+        },
+
+        // grunt-contrib-symlink
+        symlink: {
+            prepare: {
+                src: 'src',
+                dest: 'wwwroot/src'
             }
         },
 
