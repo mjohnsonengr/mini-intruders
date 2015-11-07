@@ -34,7 +34,7 @@
 
             // This fades the preload bar over the duration of 1 second
             this.add.tween(this.preloadBar)
-                .to({ alpha: 0 }, 1000, Phaser.Easing.Linear.None, true)
+                .to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true)
                 .onComplete.add(this.startMainMenu, this);
 
         }
