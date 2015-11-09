@@ -2,14 +2,12 @@
 
     export class MainMenu extends Phaser.State {
 
-        // the background
-        private background: Phaser.Sprite;
-
         // the objects involved
         private intro: Phaser.Sprite;
         private logo: Phaser.Sprite;
         private groupBtns: Phaser.Group; // sprite group for animating menu buttons together
         private buttons: Button[];
+        private selector: Selector; // selector showing selected menu item
 
         // some positions we need to use; calculated on the fly
         private get logoHt() { return this.logo && this.logo.height; }
@@ -34,7 +32,7 @@
 
         public create() {
             // background
-            this.background = this.add.sprite(0, 0, 'background01');
+            this.add.sprite(0, 0, 'background01');
 
             // create our menu elements
             this.createIntro();
@@ -73,7 +71,7 @@
 
             // add each button; anchor at top center, and increment y to account for spacing.
             btns.forEach((name) => {
-                var btn: Button = new Button(name);
+                var btn: Button = new Button(name, this.buttons.length);
 
                 // sprite and pos
                 var btnSprite = btn.createSprite(y, this.game);
@@ -84,6 +82,9 @@
                 this.buttons.push(btn);
                 btn.registerEvents(() => this[name+"Clicked"]());
             });
+
+            // we'll just stick this here instead of making a new method for it :D
+            this.selector = new Selector(this.buttons, this.game);
         }
 
         /** Intro starts at center, fades out */
@@ -106,33 +107,63 @@
 
         /** Registers all menu input; this shouldn't happen until the tweens are done. */
         private registerInput() {
-            console.log("Menu registerInput");
-            // button events
+            // button events (button handles mouse move and clicks)
             this.buttons.forEach(btn => {
                 btn.enableInput();
+                // when button is selected w/ mouse, move selector to it
+                btn.selectedCallback = idx => {
+                    this.selector.moveTo(idx);
+                    this.updateSelected(idx);
+                };
             });
 
-            // TODO keyboard events
-            // basically, mouse mode or keyboard mode.
-            // mouse move switches to mouse mode
-            // keyboard up/down switches to keyboard mode (selects play)
-            // enter will always "click" the active
+            // keyboard control
+            var upKey = this.input.keyboard.addKey(Phaser.Keyboard.UP);
+            upKey.onUp.add(() => this.upPressed());
+            var downKey = this.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+            downKey.onUp.add(() => this.downPressed());
+            var enterKey = this.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+            enterKey.onUp.add(() => this.enterPressed());
         }
+
 
         private creditsClicked()  {
             console.log("Me, myself and root");
         }
-
         private exitClicked() {
             close();
         }
-
         private helpClicked() {
             console.log("Help yourself!");
         }
-
         private playClicked() {
             console.log("Play clicked!");
+        }
+
+
+        private upPressed() {
+            var idx = this.selector.moveUp();
+            this.updateSelected(idx);
+        }
+        private downPressed() {
+            var idx = this.selector.moveDown();
+            this.updateSelected(idx);
+        }
+        private enterPressed() {
+            var idx = this.selector.getIndex();
+            // call appropriate Clicked method:
+            this[this.buttons[idx].name+"Clicked"]();
+        }
+
+        private updateSelected(idx: number) {
+            this.clearSelection();
+            this.buttons[idx].selected();
+        }
+
+        private clearSelection() {
+            this.buttons.forEach(btn => {
+                btn.unselected();
+            });
         }
 
     }
@@ -142,8 +173,12 @@
         public name: string;
         public sprite: Phaser.Sprite;
 
+        /** A method to be called when button is selected by mouse; index is passed */
+        public selectedCallback: (number) => void;
+
         private img: string;
         private imgActive: string;
+        private index: number;
 
         /**
          * Creates a Button, including initializing it's sprite.  Events are not
@@ -157,8 +192,9 @@
          * @param img {string} frame key of sprite when not active.  `name + "1.png"` if not specified
          * @param imgActive {string} frame key of sprite when active.  `name + "2.png"` if not specified
          */
-        constructor(name: string, img?: string, imgActive?: string) {
+        constructor(name: string, index: number, img?: string, imgActive?: string) {
             this.name = name;
+            this.index = index;
             this.img = img ? img : name + "1.png";
             this.imgActive = imgActive ? imgActive : name + "2.png";
         }
@@ -184,16 +220,12 @@
          * @param onClick Click handler for this button
          */
         public registerEvents(onClick: () => void): void {
-            console.log("registerEvents() called for " + this.name);
-            var sp = this.sprite;
-            var evt = sp.events;
-            evt.onInputOver.add(() => this.selected());
-            evt.onInputOut.add(() => this.unselected());
-            evt.onInputUp.add(onClick);
+            this.sprite.events.onInputUp.add(onClick);
+            this.sprite.events.onInputOver.add(() => this.mouseSelected());
         }
 
+        /** Enables input on this button */
         public enableInput(): void {
-            console.log("enableInput() called for " + this.name);
             this.sprite.inputEnabled = true;
         }
 
@@ -207,6 +239,99 @@
             this.sprite.frameName = this.img;
         }
 
+        /** Selects this button and calls callback (to be used with hover) */
+        private mouseSelected() {
+            this.selected();
+            this.selectedCallback(this.index);
+        }
+
+    }
+
+    class Selector {
+        private index: number;
+        private buttons: Button[];
+        private sprite: Phaser.Sprite;
+
+        constructor(buttons: Button[], game: Phaser.Game) {
+            this.index = -1;
+            this.buttons = buttons;
+            this.sprite = game.add.sprite(-1000, -1000, 'sprites', 'fighter1.png');
+        }
+
+        /**
+         * Returns the index of the button currently selected.  If < 0, this
+         * selector is invalid; It can be made valid w/ moveUp() and moveDown()
+         * calls
+         */
+        public getIndex() {
+            return this.index;
+        }
+
+        /** Moves the selector up; returns new index */
+        public moveUp(): number {
+            // may have been in an uninitialized state
+            if (this.index < 0) {
+                this.init();
+            }
+            else if (this.index > 0) {
+                this.index--;
+                this.recalcCoords();
+            }
+            return this.index;
+        }
+
+        /** Moves the selector down; returns new index */
+        public moveDown(): number {
+            // may have been uninitialized
+            if (this.index < 0) {
+                this.init();
+            }
+            else if (this.index < this.buttons.length-1) {
+                this.index++;
+                this.recalcCoords();
+            }
+            return this.index
+        }
+
+        public moveTo(idx: number) {
+            this.init(idx);
+        }
+
+        /** Returns the sprite associated with the specified button */
+        private getBtnSprite(idx: number) {
+            return this.buttons[idx].sprite;
+        }
+
+        /** Returns the x coordinate required to display selector next to specified button */
+        private getXFromButton(idx: number) {
+            var spr = this.getBtnSprite(idx);
+            var sprWid = this.sprite.width;
+            var spaceAdjust = sprWid;
+            return spr.left + spr.parent.x - sprWid - spaceAdjust;
+        }
+
+        /** Returns the y coordinate required to display selector next to specified button */
+        private getYFromButton(idx: number) {
+            var spr = this.getBtnSprite(idx);
+            return spr.top + spr.parent.y;
+        }
+
+        /** Initializes this selector to button 0 */
+        private init(idx?: number) {
+            if (idx == null) idx = 0;
+            this.index = idx;
+            this.recalcCoords();
+            this.sprite.alpha = 1;
+        }
+
+        /**
+         * Recalculates the x and y coordinates and repositions the selector sprite.
+         * Use after moving or initializing the selector
+         */
+        private recalcCoords() {
+            this.sprite.x = this.getXFromButton(this.index);
+            this.sprite.y = this.getYFromButton(this.index);
+        }
     }
 
 }
