@@ -8,11 +8,8 @@
         // the objects involved
         private intro: Phaser.Sprite;
         private logo: Phaser.Sprite;
-        private buttons: Phaser.Group;
-        private btnPlay: Phaser.Sprite;
-        private btnHelp: Phaser.Sprite;
-        private btnCredits: Phaser.Sprite;
-        private btnExit: Phaser.Sprite;
+        private groupBtns: Phaser.Group; // sprite group for animating menu buttons together
+        private buttons: Button[];
 
         // some positions we need to use; calculated on the fly
         private get logoHt() { return this.logo && this.logo.height; }
@@ -26,14 +23,16 @@
         private tw2LogoMoveDown: Phaser.Tween;
         private tw3LogoMoveUp: Phaser.Tween;
 
-        // Starts the tweens
+        /** Starts the tweens by calling the first one; call chainTweens() first */
         private startTweening = () => this.tw0IntroFadeOut.start();
 
+        /** Method called when tweening is completed. */
+        private onTweenComplete: () => void;
+
         // updates buttons positioning relative to logo
-        private updateButtonsY = () => this.buttons.y = this.logo.y + this.logoBtnSpace;
+        private updateButtonsY = () => this.groupBtns.y = this.logo.y + this.logoBtnSpace;
 
         public create() {
-
             // background
             this.background = this.add.sprite(0, 0, 'background01');
 
@@ -46,17 +45,7 @@
             this.chainTweens();
             this.startTweening();
 
-
-            // TODO menu items, when hovered over change to a highlighted one.
-
-
-            // TODO register appropriate handlers for menu item clicks?
-
-
-            // TODO if any key is pressed during the menu animation, skip to end tween State
-
-
-            // TODO keyboard control of menu?
+            this.onTweenComplete = () => this.registerInput();
         }
 
         /** Chains the tweens together */
@@ -67,29 +56,34 @@
                 this.tw3LogoMoveUp);
             // move buttons with logo
             this.tw3LogoMoveUp.onUpdateCallback(this.updateButtonsY);
+            // tween oncomplete callback
+            this.tw3LogoMoveUp.onComplete.add(() => this.onTweenComplete());
         }
 
         /** Create buttons group; they move up with logo, then move back down a bit */
         private createButtons() {
             var y = 0; // y position to keep track of where next button goes
             var spacing = 2.0; // space between buttons (modifier to height)
-            var btns = [["btnPlay", "play1.png"], ["btnHelp", "help1.png"], ["btnCredits", "credits1.png"], ["btnExit", "exit1.png"]];
-            this.buttons = this.add.group();
+            var btns = ["play", "help", "credits", "exit"];
+            this.groupBtns = this.add.group();
+            this.buttons = [];
 
             // set initial position
-            this.buttons.y = this.logoDownY + this.logoBtnSpace;
+            this.groupBtns.y = this.logoDownY + this.logoBtnSpace;
 
             // add each button; anchor at top center, and increment y to account for spacing.
-            btns.forEach((val) => {
-                var btn: Phaser.Sprite = this.buttons.create(this.world.centerX, y, 'menu');
-                btn.anchor.setTo(0.5, 0);
-                btn.frameName = val[1];
-                y += btn.height*spacing;
-                this[val[0]] = btn;
-            });
+            btns.forEach((name) => {
+                var btn: Button = new Button(name);
 
-            // final menu item position
-            var menuYPos = this.game.world.height/2 - this.buttons.height/2; // center them
+                // sprite and pos
+                var btnSprite = btn.createSprite(y, this.game);
+                this.groupBtns.add(btnSprite);
+                y += btnSprite.height*spacing;
+
+                // save the button and register its events.
+                this.buttons.push(btn);
+                btn.registerEvents(() => this[name+"Clicked"]());
+            });
         }
 
         /** Intro starts at center, fades out */
@@ -108,6 +102,109 @@
             this.tw1LogoFadeIn = this.add.tween(this.logo).to({alpha: 1});
             this.tw2LogoMoveDown = this.add.tween(this.logo).to({y: this.logoDownY});
             this.tw3LogoMoveUp = this.add.tween(this.logo).to({y: this.logoUpY}, 2000);
+        }
+
+        /** Registers all menu input; this shouldn't happen until the tweens are done. */
+        private registerInput() {
+            console.log("Menu registerInput");
+            // button events
+            this.buttons.forEach(btn => {
+                btn.enableInput();
+            });
+
+            // TODO keyboard events
+            // basically, mouse mode or keyboard mode.
+            // mouse move switches to mouse mode
+            // keyboard up/down switches to keyboard mode (selects play)
+            // enter will always "click" the active
+        }
+
+        private creditsClicked()  {
+            console.log("Me, myself and root");
+        }
+
+        private exitClicked() {
+            close();
+        }
+
+        private helpClicked() {
+            console.log("Help yourself!");
+        }
+
+        private playClicked() {
+            console.log("Play clicked!");
+        }
+
+    }
+
+    class Button {
+
+        public name: string;
+        public sprite: Phaser.Sprite;
+
+        private img: string;
+        private imgActive: string;
+
+        /**
+         * Creates a Button, including initializing it's sprite.  Events are not
+         * registered until `Button.registerEvents()` is called.  Assumes sprite
+         * is represented by two frames in a texture atlas with the key 'menu'.
+         * `img` and `imgActive` are the keys for those two frames.
+         *
+         * @param name {string} Name of this Button
+         * @param y {number} Y position to set to Sprite
+         * @param game {Phaser.Game} Game object
+         * @param img {string} frame key of sprite when not active.  `name + "1.png"` if not specified
+         * @param imgActive {string} frame key of sprite when active.  `name + "2.png"` if not specified
+         */
+        constructor(name: string, img?: string, imgActive?: string) {
+            this.name = name;
+            this.img = img ? img : name + "1.png";
+            this.imgActive = imgActive ? imgActive : name + "2.png";
+        }
+
+        /**
+         * Creates this button's sprite given a y position and game object
+         *
+         * @param y The y position of this button, relative to its parent
+         * @param game The Phaser.Game object
+         * @return The sprite
+         */
+        public createSprite(y: number, game: Phaser.Game): Phaser.Sprite {
+            var sp = game.add.sprite(game.world.centerX, y, 'menu');
+            sp.anchor.setTo(0.5, 0);
+            sp.frameName = this.img;
+            this.sprite = sp;
+            return sp;
+        }
+
+        /**
+         * Registers the hover events to change the Button's style, and a click handler.
+         *
+         * @param onClick Click handler for this button
+         */
+        public registerEvents(onClick: () => void): void {
+            console.log("registerEvents() called for " + this.name);
+            var sp = this.sprite;
+            var evt = sp.events;
+            evt.onInputOver.add(() => this.selected());
+            evt.onInputOut.add(() => this.unselected());
+            evt.onInputUp.add(onClick);
+        }
+
+        public enableInput(): void {
+            console.log("enableInput() called for " + this.name);
+            this.sprite.inputEnabled = true;
+        }
+
+        /** Selects this button */
+        public selected() {
+            this.sprite.frameName = this.imgActive;
+        }
+
+        /** Unselects this button */
+        public unselected() {
+            this.sprite.frameName = this.img;
         }
 
     }
