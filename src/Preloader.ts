@@ -36,7 +36,7 @@
             this.add.tween(this.preloadBar)
                 .to({ alpha: 0 }, 500, Phaser.Easing.Linear.None, true)
                 .onComplete.add(this.startMainMenu, this);
-
+            this.add.audio('music', 1, true).play();
         }
 
         private startMainMenu() {
