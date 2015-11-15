@@ -137,7 +137,7 @@
             console.log("Help yourself!");
         }
         private playClicked() {
-            console.log("Play clicked!");
+            this.game.state.start('Level');
         }
 
 
