@@ -53,8 +53,8 @@ module.exports = function (grunt) {
         copy: {
             prepare: {
                 expand: true,
-                cwd: 'bower_components/phaser/build/',
-                src: 'phaser.js',
+                flatten: true,
+                src: ['bower_components/phaser/build/phaser.js', 'bower_components/requirejs/require.js'],
                 dest: 'wwwroot/libs/'
             }
         },

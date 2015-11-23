@@ -12,7 +12,7 @@
         "noLib": false,
         "preserveConstEnums": true,
         "suppressImplicitAnyIndexErrors": true,
-        "outFile": "wwwroot/js/game.js",
+        "outDir": "wwwroot/js/",
         "sourceMap": true
     },
     "filesGlob": [
