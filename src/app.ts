@@ -1,5 +1,7 @@
 ﻿'use strict';
 
+import {Game} from "./Game";
+
 window.onload = () => {
-    var game = new MiniIntruders.Game();
+    var game = new Game();
 };

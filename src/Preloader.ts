@@ -1,5 +1,3 @@
-﻿module MiniIntruders {
-
     export class Preloader extends Phaser.State {
 
         private preloadBar: Phaser.Sprite;
@@ -46,5 +44,3 @@
         }
 
     }
-
-}

@@ -1,4 +1,6 @@
-﻿module MiniIntruders {
+import {Boot} from "./Boot";
+import {Preloader} from "./Preloader";
+import {MainMenu} from "./MainMenu";
 
     export class Game extends Phaser.Game {
 
@@ -14,5 +16,3 @@
         }
 
     }
-
-}

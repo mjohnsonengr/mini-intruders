@@ -1,5 +1,3 @@
-﻿module MiniIntruders {
-
     export class Boot extends Phaser.State {
 
         public preload() {
@@ -33,5 +31,3 @@
         }
 
     }
-
-}

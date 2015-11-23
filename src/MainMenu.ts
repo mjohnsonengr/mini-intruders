@@ -1,5 +1,3 @@
-﻿module MiniIntruders {
-
     export class MainMenu extends Phaser.State {
 
         // the objects involved
@@ -333,5 +331,3 @@
             this.sprite.y = this.getYFromButton(this.index);
         }
     }
-
-}
