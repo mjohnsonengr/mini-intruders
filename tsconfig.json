@@ -27,5 +27,8 @@
         "src/Preloader.ts",
         "src/typings/tsd.d.ts"
     ],
-    "exclude": []
+    "exclude": [],
+    "atom": {
+        "rewriteTsconfig": true
+    }
 }
