@@ -6,12 +6,12 @@ module MiniIntruders {
 
             super(game, x, y, 'sprites', 'fighter1.png');
 
+            this.angle = -90;
             this.anchor.setTo(0.5, 0);
-
-            game.add.existing(this);
 
             game.physics.enable(this);
 
+            game.add.existing(this);
         }
 
         public update() {
