@@ -1,8 +1,12 @@
 ﻿module MiniIntruders {
+    export enum GameOptions {
+        REGULAR = 0,
+        PLAY = 1, // skips menu and goes straight to gameplay
+    }
 
     export class Game extends Phaser.Game {
 
-        constructor() {
+        constructor(opts?: GameOptions) {
 
             super(640, 480, Phaser.AUTO, 'content');
 
@@ -14,5 +18,8 @@
         }
 
     }
+        /*public static parseArgs(args: string): GameOptions {
+
+        }*/
 
 }
