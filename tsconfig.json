@@ -23,6 +23,7 @@
         "src/app.ts",
         "src/Boot.ts",
         "src/Game.ts",
+        "src/GameState.ts",
         "src/MainMenu.ts",
         "src/Preloader.ts",
         "src/typings/tsd.d.ts"
