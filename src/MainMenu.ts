@@ -172,7 +172,7 @@ class Button {
     public sprite: Phaser.Sprite;
 
     /** A method to be called when button is selected by mouse; index is passed */
-    public selectedCallback: (number) => void;
+    public selectedCallback: (idx: number) => void;
 
     private img: string;
     private imgActive: string;
