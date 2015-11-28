@@ -1,3 +1,4 @@
+import {GameState} from "./GameState";
 import {Boot} from "./Boot";
 import {Preloader} from "./Preloader";
 import {MainMenu} from "./MainMenu";
@@ -13,10 +14,10 @@ export class Game extends Phaser.Game {
 
         super(640, 480, Phaser.AUTO, 'content');
 
-        this.state.add('Boot', Boot, true);
-        this.state.add('Preloader', Preloader, false);
-        this.state.add('MainMenu', MainMenu, false);
-        //this.state.add('Level1', Level1, false);
+        this.state.add(GameState.BOOT, Boot, true);
+        this.state.add(GameState.PRELOADER, Preloader, false);
+        this.state.add(GameState.MAINMENU, MainMenu, false);
+        //this.state.add(GameState.LEVEL1, Level1, false);
 
     }
     /*public static parseArgs(args: string): GameOptions {

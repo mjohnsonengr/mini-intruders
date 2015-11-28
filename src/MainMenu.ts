@@ -1,4 +1,7 @@
-export class MainMenu extends Phaser.State {
+import {GameState} from "./GameState";
+
+export class MainMenu extends GameState {
+    public static nextStateKey = GameState.LEVEL1;
 
     // the objects involved
     private intro: Phaser.Sprite;
