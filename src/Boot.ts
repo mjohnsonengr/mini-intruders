@@ -1,7 +1,7 @@
-import {GameState} from "./GameState";
+import {GameState, GameStateID} from "./GameState";
 
 export class Boot extends GameState {
-    public static nextStateKey = GameState.PRELOADER;
+    public static nextStateKey = GameStateID.Preloader;
 
     public preload() {
 

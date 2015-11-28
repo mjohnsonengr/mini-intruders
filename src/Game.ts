@@ -1,6 +1,6 @@
 import * as common from "./common";
 
-import {GameState} from "./GameState";
+import {GameState, GameStateID} from "./GameState";
 import {Boot} from "./Boot";
 import {Preloader} from "./Preloader";
 import {MainMenu} from "./MainMenu";
@@ -21,13 +21,16 @@ export class Game extends Phaser.Game {
 
         if (opts & GameOptions.PLAY) console.log("PLAY!!!");
 
-        this.state.add(GameState.BOOT, Boot, true);
-        this.state.add(GameState.PRELOADER, Preloader, false);
-        this.state.add(GameState.MAINMENU, MainMenu, false);
-        this.state.add("Level", Level, false);
+        this.addState(GameStateID.Boot, Boot, true);
+        this.addState(GameStateID.Preloader, Preloader);
+        this.addState(GameStateID.MainMenu, MainMenu);
+        this.addState(GameStateID.Level, Level);
 
     }
 
+    public addState(id: GameStateID, state: any, autoStart?: boolean): void {
+        this.state.add(GameStateID[id], state, autoStart);
+    }
 }
 
 export function getOptsFromParameters(): GameOptions {
