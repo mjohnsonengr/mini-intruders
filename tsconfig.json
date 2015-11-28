@@ -23,6 +23,7 @@
     ],
     "files": [
         "src/Boot.ts",
+        "src/common.ts",
         "src/Game.ts",
         "src/GameState.ts",
         "src/MainMenu.ts",
