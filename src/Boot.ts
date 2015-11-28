@@ -1,4 +1,7 @@
-export class Boot extends Phaser.State {
+import {GameState} from "./GameState";
+
+export class Boot extends GameState {
+    public static nextStateKey = GameState.PRELOADER;
 
     public preload() {
 
@@ -26,7 +29,7 @@ export class Boot extends Phaser.State {
             // Same goes for mobile settings
         }
 
-        this.game.state.start('Preloader', true, false);
+        this.nextState();
 
     }
 

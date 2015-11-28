@@ -23,7 +23,9 @@
     ],
     "files": [
         "src/Boot.ts",
+        "src/common.ts",
         "src/Game.ts",
+        "src/GameState.ts",
         "src/MainMenu.ts",
         "src/Preloader.ts",
         "src/typings/tsd.d.ts"

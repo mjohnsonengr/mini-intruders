@@ -1,4 +1,7 @@
-export class Preloader extends Phaser.State {
+import {GameState} from "./GameState";
+
+export class Preloader extends GameState {
+    public static nextStateKey = GameState.MAINMENU;
 
     private preloadBar: Phaser.Sprite;
 
@@ -39,7 +42,7 @@ export class Preloader extends Phaser.State {
 
     private startMainMenu() {
 
-        this.game.state.start('MainMenu', true, false);
+        this.nextState();
 
     }
 
