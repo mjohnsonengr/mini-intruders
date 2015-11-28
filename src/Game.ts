@@ -1,3 +1,5 @@
+import * as common from "./common";
+
 import {GameState} from "./GameState";
 import {Boot} from "./Boot";
 import {Preloader} from "./Preloader";
@@ -14,14 +16,23 @@ export class Game extends Phaser.Game {
 
         super(640, 480, Phaser.AUTO, 'content');
 
+        if (!opts) opts = getOptsFromParameters();
+
+        if (opts & GameOptions.PLAY) console.log("PLAY!!!");
+
         this.state.add(GameState.BOOT, Boot, true);
         this.state.add(GameState.PRELOADER, Preloader, false);
         this.state.add(GameState.MAINMENU, MainMenu, false);
         //this.state.add(GameState.LEVEL1, Level1, false);
 
     }
-    /*public static parseArgs(args: string): GameOptions {
 
-    }*/
+}
 
+export function getOptsFromParameters(): GameOptions {
+    var opts = GameOptions.REGULAR;
+
+    if (common.getParameterByName("play") != null) opts |= GameOptions.PLAY;
+
+    return opts;
 }
