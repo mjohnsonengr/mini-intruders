@@ -1,5 +1,3 @@
-module MiniIntruders {
-
     export class Player extends Phaser.Sprite {
 
         constructor(game: Phaser.Game, x: number, y: number) {
@@ -41,5 +39,3 @@ module MiniIntruders {
         }
 
     }
-
-}

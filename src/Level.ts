@@ -1,4 +1,4 @@
-module MiniIntruders {
+import {Player} from "./Player";
 
     export class Level extends Phaser.State {
 
@@ -16,5 +16,3 @@ module MiniIntruders {
         }
 
     }
-
-}

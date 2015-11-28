@@ -5,3 +5,4 @@ wwwroot/js/
 wwwroot/libs/
 tscommand-*.tmp.txt
 wwwroot/src
+.baseDir.ts
