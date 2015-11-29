@@ -1,28 +1,28 @@
-    export class Player extends Phaser.Sprite {
+export class Player extends Phaser.Sprite {
 
-        constructor(game: Phaser.Game, x: number, y: number) {
+    constructor(game: Phaser.Game, x: number, y: number) {
 
-            super(game, x, y, 'sprites', 'fighter1.png');
+        super(game, x, y, 'sprites', 'fighter1.png');
 
-            this.angle = -90;
-            this.anchor.setTo(0.5, 0);
+        this.angle = -90;
+        this.anchor.setTo(0.5, 0);
 
-            game.physics.enable(this);
+        game.physics.enable(this);
 
-            game.add.existing(this);
+        game.add.existing(this);
+    }
+
+    public update() {
+
+        this.body.velocity.x = 0;
+
+        if (this.game.input.keyboard.isDown(Phaser.Keyboard.LEFT)) {
+            this.body.velocity.x = -170;
         }
-
-        public update() {
-
-            this.body.velocity.x = 0;
-
-            if (this.game.input.keyboard.isDown(Phaser.Keyboard.LEFT)) {
-                this.body.velocity.x = -170;
-            }
-            else if (this.game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)) {
-                this.body.velocity.x = 170;
-            }
-
+        else if (this.game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)) {
+            this.body.velocity.x = 170;
         }
 
     }
+
+}
