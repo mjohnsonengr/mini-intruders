@@ -1,8 +1,8 @@
 export class Player extends Phaser.Sprite {
 
-    constructor(game: Phaser.Game, x: number, y: number) {
+    constructor(game: Phaser.Game, x: number, y: number, key?: string|Phaser.RenderTexture|Phaser.BitmapData|PIXI.Texture, frame?: string|number) {
 
-        super(game, x, y, 'sprites', 'fighter1.png');
+        super(game, x, y, key, frame);
 
         this.angle = -90;
         this.anchor.setTo(0.5, 0);

@@ -1,4 +1,5 @@
 import {Player} from "./Player/Player";
+import {Fighter1} from "./Player/Fighter1";
 
 export class Level extends Phaser.State {
 
@@ -11,7 +12,7 @@ export class Level extends Phaser.State {
 
         this.background = this.add.sprite(0, 0, 'background01');
 
-        this.player = new Player(this.game, this.game.world.centerX, this.game.world.height*0.8);
+        this.player = new Fighter1(this.game, this.game.world.centerX, this.game.world.height*0.8);
 
     }
 
