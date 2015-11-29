@@ -33,7 +33,9 @@
         "src/Player/Fighter3.ts",
         "src/Player/Player.ts",
         "src/Preloader.ts",
-        "src/typings/tsd.d.ts"
+        "src/typings/tsd.d.ts",
+        "src/Weapon/PlayerWeapon.ts",
+        "src/Weapon/Weapon.ts"
     ],
     "exclude": [],
     "atom": {
