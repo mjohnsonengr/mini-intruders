@@ -11,7 +11,7 @@ import {Player} from "./Player";
 
             this.background = this.add.sprite(0, 0, 'background01');
 
-            this.player = new Player(this.game, 130, 284);
+            this.player = new Player(this.game, this.game.world.centerX, this.game.world.height*0.8);
 
         }
 
