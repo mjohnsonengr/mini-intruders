@@ -19,7 +19,10 @@ export class Game extends Phaser.Game {
 
         if (!opts) opts = getOptsFromParameters();
 
-        if (opts & GameOptions.PLAY) console.log("PLAY!!!");
+        if (opts & GameOptions.PLAY) {
+            console.log("PLAY!!!");
+            this.skipMenu();
+        }
 
         this.addState(GameStateID.Boot, Boot, true);
         this.addState(GameStateID.Preloader, Preloader);
@@ -31,6 +34,12 @@ export class Game extends Phaser.Game {
     public addState(id: GameStateID, state: any, autoStart?: boolean): void {
         this.state.add(GameStateID[id], state, autoStart);
     }
+
+    /** Performs the required operations in order to skip the menu and go straight to game play */
+    public skipMenu(): void {
+        Preloader.nextStateKey = GameStateID.Level;
+    }
+
 }
 
 export function getOptsFromParameters(): GameOptions {
