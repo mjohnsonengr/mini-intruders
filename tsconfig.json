@@ -28,7 +28,7 @@
         "src/GameState.ts",
         "src/Level.ts",
         "src/MainMenu.ts",
-        "src/Player.ts",
+        "src/Player/Player.ts",
         "src/Preloader.ts",
         "src/typings/tsd.d.ts"
     ],

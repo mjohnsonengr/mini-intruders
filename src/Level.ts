@@ -1,4 +1,4 @@
-import {Player} from "./Player";
+import {Player} from "./Player/Player";
 
 export class Level extends Phaser.State {
 
