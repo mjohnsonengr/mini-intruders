@@ -1,7 +1,7 @@
-import {GameState} from "./GameState";
+import {GameState, GameStateID} from "./GameState";
 
 export class Preloader extends GameState {
-    public static nextStateKey = GameState.MAINMENU;
+    public static nextStateKey = GameStateID.MainMenu;
 
     private preloadBar: Phaser.Sprite;
 

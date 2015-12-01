@@ -1,9 +1,10 @@
 import * as common from "./common";
 
-import {GameState} from "./GameState";
+import {GameState, GameStateID} from "./GameState";
 import {Boot} from "./Boot";
 import {Preloader} from "./Preloader";
 import {MainMenu} from "./MainMenu";
+import {Level} from "./Level";
 
 export enum GameOptions {
     REGULAR = 0,
@@ -18,13 +19,25 @@ export class Game extends Phaser.Game {
 
         if (!opts) opts = getOptsFromParameters();
 
-        if (opts & GameOptions.PLAY) console.log("PLAY!!!");
+        if (opts & GameOptions.PLAY) {
+            console.log("PLAY!!!");
+            this.skipMenu();
+        }
 
-        this.state.add(GameState.BOOT, Boot, true);
-        this.state.add(GameState.PRELOADER, Preloader, false);
-        this.state.add(GameState.MAINMENU, MainMenu, false);
-        //this.state.add(GameState.LEVEL1, Level1, false);
+        this.addState(GameStateID.Boot, Boot, true);
+        this.addState(GameStateID.Preloader, Preloader);
+        this.addState(GameStateID.MainMenu, MainMenu);
+        this.addState(GameStateID.Level, Level);
 
+    }
+
+    public addState(id: GameStateID, state: any, autoStart?: boolean): void {
+        this.state.add(GameStateID[id], state, autoStart);
+    }
+
+    /** Performs the required operations in order to skip the menu and go straight to game play */
+    public skipMenu(): void {
+        Preloader.nextStateKey = GameStateID.Level;
     }
 
 }

@@ -1,7 +1,7 @@
-import {GameState} from "./GameState";
+import {GameState, GameStateID} from "./GameState";
 
 export class MainMenu extends GameState {
-    public static nextStateKey = GameState.LEVEL1;
+    public static nextStateKey = GameStateID.Level;
 
     // the objects involved
     private intro: Phaser.Sprite;
@@ -138,7 +138,7 @@ export class MainMenu extends GameState {
         console.log("Help yourself!");
     }
     private playClicked() {
-        console.log("Play clicked!");
+        this.game.state.start('Level');
     }
 
 
