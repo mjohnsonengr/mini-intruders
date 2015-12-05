@@ -1,3 +1,5 @@
+import * as common from "../common";
+
 import {Weapon} from "../Weapon/Weapon";
 import keys = Phaser.Keyboard; // shortcut
 
@@ -5,6 +7,8 @@ export abstract class Player extends Phaser.Sprite {
 
     private _debug = false;
     private weapon: Weapon;
+
+    protected speed: number;
 
     constructor(game: Phaser.Game, x: number, y: number, key?: string|Phaser.RenderTexture|Phaser.BitmapData|PIXI.Texture, frame?: string|number) {
 
@@ -21,14 +25,15 @@ export abstract class Player extends Phaser.Sprite {
     }
 
     public update() {
+        common.assert(this.speed, "Player.speed is uninitialized!");
 
         // side-to-side
         this.body.velocity.x = 0;
         if (this.keyDown(keys.LEFT)) {
-            this.body.velocity.x = -170;
+            this.body.velocity.x = -this.speed;
         }
         else if (this.keyDown(keys.RIGHT)) {
-            this.body.velocity.x = 170;
+            this.body.velocity.x = this.speed;
         }
 
         // firing
