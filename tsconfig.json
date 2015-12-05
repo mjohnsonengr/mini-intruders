@@ -28,6 +28,7 @@
         "src/GameState.ts",
         "src/Level.ts",
         "src/MainMenu.ts",
+        "src/Missile/Missile.ts",
         "src/Player/Fighter1.ts",
         "src/Player/Fighter2.ts",
         "src/Player/Fighter3.ts",
