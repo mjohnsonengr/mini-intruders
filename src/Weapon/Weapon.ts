@@ -1,5 +1,6 @@
 import * as common from "../common";
 
+import {Level} from "../Level";
 import {Missile} from "../Missile/Missile";
 import {Player} from "../Player/Player";
 
@@ -10,6 +11,7 @@ import {Player} from "../Player/Player";
 export abstract class Weapon {
     public firing = false;
     public game: Phaser.Game;
+    public level: Level;
 
     // these help determine how and when to fire
     protected fireInterval: number;
@@ -25,10 +27,12 @@ export abstract class Weapon {
     // gets position of this weapon to fire from
     private getPosition: () => Phaser.Point;
 
-    constructor(game: Phaser.Game, getPosition: () => Phaser.Point) {
-        this.game = game;
+
+    constructor(level: Level, getPosition: () => Phaser.Point) {
+        this.level = level;
+        this.game = level.game;
         this.getPosition = getPosition;
-        this.missiles = new Phaser.Group(game);
+        this.missiles = new Phaser.Group(this.game);
     }
 
     public update(): void {

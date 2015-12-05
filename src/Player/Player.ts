@@ -1,27 +1,32 @@
 import * as common from "../common";
 
+import {Level} from "../Level";
 import {Weapon} from "../Weapon/Weapon";
 import keys = Phaser.Keyboard; // shortcut
 
 export abstract class Player extends Phaser.Sprite {
+
+    public level: Level;
 
     private _debug = false;
     private weapon: Weapon;
 
     protected speed: number;
 
-    constructor(game: Phaser.Game, x: number, y: number, key?: string|Phaser.RenderTexture|Phaser.BitmapData|PIXI.Texture, frame?: string|number) {
+    constructor(level: Level, x: number, y: number, key?: string|Phaser.RenderTexture|Phaser.BitmapData|PIXI.Texture, frame?: string|number) {
 
-        super(game, x, y, key, frame);
+        super(level.game, x, y, key, frame);
+
+        this.level = level;
 
         this.anchor.setTo(0.5, 0);
 
-        game.physics.enable(this);
+        this.game.physics.enable(this);
         this.body.collideWorldBounds = true;
 
         this.weapon = this.getWeapon();
 
-        game.add.existing(this);
+        this.game.add.existing(this);
     }
 
     public update() {
