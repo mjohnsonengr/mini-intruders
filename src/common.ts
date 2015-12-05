@@ -3,6 +3,10 @@
  * to future projects of any type.
  */
 
+ export function assert(pred: any, msg?: string): void {
+     if (!pred) throw new Error("Assertion failed!" + msg);
+ }
+
 /**
  * From http://stackoverflow.com/a/901144/1405720
  * Retrieves the value of a named parameter from the URL.
