@@ -1,8 +1,8 @@
 export abstract class Missile extends Phaser.Sprite {
 
-    constructor(game: Phaser.Game, x: number, y: number,
+    constructor(game: Phaser.Game, pos: Phaser.Point,
         key?: string|Phaser.RenderTexture|Phaser.BitmapData|PIXI.Texture, frame?: string|number) {
-        super(game, x, y, key, frame);
+        super(game, pos.x, pos.y, key, frame);
 
         game.physics.enable(this);
 
