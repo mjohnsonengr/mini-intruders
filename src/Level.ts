@@ -7,13 +7,7 @@ export class Level extends Phaser.State {
     private player: Player;
 
     public create() {
-
-        //this.physics.startSystem(Phaser.Physics.ARCADE);
-
         this.background = this.add.sprite(0, 0, 'background01');
-
         this.player = new Fighter1(this, this.game.world.centerX, this.game.world.height*0.8);
-
     }
-
 }
