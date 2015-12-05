@@ -8,6 +8,6 @@ export class BasicUpWeapon extends Weapon {
     protected fireDirection = -90; // up means negative y!!
 
     protected createMissile(): Missile {
-        return new SmallUpMissile(this.game, this.player.world);
+        return new SmallUpMissile(this.game);
     }
 }

@@ -10,6 +10,6 @@ export class Fighter1 extends Player {
     }
 
     protected getWeapon(): Weapon {
-        return new BasicUpWeapon(this.game, this);
+        return new BasicUpWeapon(this.game, () => this.world);
     }
 }

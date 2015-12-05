@@ -10,7 +10,6 @@ import {Player} from "../Player/Player";
 export abstract class Weapon {
     public firing = false;
     public game: Phaser.Game;
-    public player: Player;
 
     // these help determine how and when to fire
     protected fireInterval: number;
@@ -23,9 +22,12 @@ export abstract class Weapon {
     // track all ammo so it can be re-used when it has exited the screen.
     private missiles: Phaser.Group;
 
-    constructor(game: Phaser.Game, player: Player) {
+    // gets position of this weapon to fire from
+    private getPosition: () => Phaser.Point;
+
+    constructor(game: Phaser.Game, getPosition: () => Phaser.Point) {
         this.game = game;
-        this.player = player;
+        this.getPosition = getPosition;
         this.missiles = new Phaser.Group(game);
     }
 
@@ -55,7 +57,7 @@ export abstract class Weapon {
 
     private fire(): void {
         console.log("FIRE!!!");
-        this.getMissile().fire(this.player.world, this.getVelocity());
+        this.getMissile().fire(this.getPosition(), this.getVelocity());
         this.lastFired = Date.now();
     }
 
