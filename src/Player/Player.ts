@@ -1,7 +1,7 @@
 import {Weapon} from "../Weapon/Weapon";
 import keys = Phaser.Keyboard; // shortcut
 
-export class Player extends Phaser.Sprite {
+export abstract class Player extends Phaser.Sprite {
 
     private _debug = false;
     private weapon: Weapon;
@@ -15,7 +15,7 @@ export class Player extends Phaser.Sprite {
         game.physics.enable(this);
         this.body.collideWorldBounds = true;
 
-        this.weapon = new Weapon();
+        this.weapon = this.getWeapon();
 
         game.add.existing(this);
     }
@@ -43,8 +43,9 @@ export class Player extends Phaser.Sprite {
             this.game.debug.bodyInfo(this, 32, 32);
             this.game.debug.body(this);
         }
-
     }
+
+    protected abstract getWeapon(): Weapon;
 
     private keyDown = (key: number) => this.game.input.keyboard.isDown(key);
 
