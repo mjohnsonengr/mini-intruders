@@ -1,3 +1,5 @@
+import {IShootable} from "./Entity/IShootable";
+import {Missile} from "./Missile/Missile";
 import {Player} from "./Player/Player";
 import {Fighter1} from "./Player/Fighter1";
 
@@ -17,5 +19,14 @@ export class Level extends Phaser.State {
 
         // add entities
         this.player = new Fighter1(this, this.game.world.centerX, this.game.world.height*0.8);
+    }
+
+    public update() {
+        this.physics.arcade.collide(this.player, this.enemyMissiles, this.missileCollision);
+    }
+
+    public missileCollision(entity: IShootable, missile: Missile) {
+        entity.onShot();
+        missile.kill();
     }
 }

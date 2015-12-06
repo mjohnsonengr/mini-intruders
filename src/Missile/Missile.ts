@@ -21,9 +21,4 @@ export abstract class Missile extends Phaser.Sprite {
         this.x = pos.x;
         this.y = pos.y;
     }
-
-    public update(): void {
-        // TODO collision
-        // hit player or enemy? Call their "shot" methods and delete bullet
-    }
 }
