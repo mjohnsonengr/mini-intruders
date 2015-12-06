@@ -24,6 +24,7 @@
     "files": [
         "src/Boot.ts",
         "src/common.ts",
+        "src/Entity/IShootable.ts",
         "src/Game.ts",
         "src/GameState.ts",
         "src/Level.ts",

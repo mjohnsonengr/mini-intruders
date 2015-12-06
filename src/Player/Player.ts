@@ -1,14 +1,17 @@
 import * as common from "../common";
 
+import {IShootable} from "../Entity/IShootable";
 import {Level} from "../Level";
 import {Weapon} from "../Weapon/Weapon";
 import keys = Phaser.Keyboard; // shortcut
 
-export abstract class Player extends Phaser.Sprite {
+export abstract class Player extends Phaser.Sprite implements IShootable {
 
     public level: Level;
 
     private _debug = false;
+    private startX: number;
+    private startY: number;
     private weapon: Weapon;
 
     protected speed: number;
@@ -18,6 +21,8 @@ export abstract class Player extends Phaser.Sprite {
         super(level.game, x, y, key, frame);
 
         this.level = level;
+        this.startX = x;
+        this.startY = y;
 
         this.anchor.setTo(0.5, 0);
 
@@ -53,6 +58,12 @@ export abstract class Player extends Phaser.Sprite {
             this.game.debug.bodyInfo(this, 32, 32);
             this.game.debug.body(this);
         }
+    }
+
+    public onShot(): void {
+        console.log("By George, He's been SHOT!");
+        this.kill();
+        setTimeout(() => this.reset(this.startX, this.startY), 1000);
     }
 
     protected abstract getWeapon(): Weapon;
