@@ -32,7 +32,7 @@ export abstract class Weapon {
         this.level = level;
         this.game = level.game;
         this.getPosition = getPosition;
-        this.missiles = new Phaser.Group(this.game);
+        this.missiles = this.game.add.group();
     }
 
     public update(): void {
@@ -53,6 +53,12 @@ export abstract class Weapon {
             .setMagnitude(this.fireSpeed).rotate(0,0,this.fireDirection,true));
     }
 
+    private addMissile(missile: Missile): Missile {
+        this.missiles.add(missile);
+        this.level.playerMissiles.add(missile);
+        return missile;
+    }
+
     private assertInitialized(): void {
         common.assert(this.fireInterval != null, "fireInterval isn't defined!");
         common.assert(this.fireSpeed != null, "fireSpeed isn't defined!");
@@ -68,6 +74,6 @@ export abstract class Weapon {
     /** returns a missile suitable for firing. */
     private getMissile(): Missile {
         console.log(this.missiles.length);
-        return this.missiles.getFirstExists(false) || this.missiles.add(this.createMissile());
+        return this.missiles.getFirstExists(false) || this.addMissile(this.createMissile());
     }
 }
