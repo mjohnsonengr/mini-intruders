@@ -7,7 +7,7 @@ export class Fighter2 extends Player {
         super(level, x, y, 'sprites', 'fighter2.png');
     }
 
-    protected getWeapon(): Weapon {
+    protected createWeapon(): Weapon {
         throw new Error("Not implemented!");
     }
 }

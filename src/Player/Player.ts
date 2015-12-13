@@ -29,7 +29,7 @@ export abstract class Player extends Phaser.Sprite implements IShootable {
         this.game.physics.enable(this);
         this.body.collideWorldBounds = true;
 
-        this.weapon = this.getWeapon();
+        this.weapon = this.createWeapon();
 
         this.game.add.existing(this);
     }
@@ -66,7 +66,7 @@ export abstract class Player extends Phaser.Sprite implements IShootable {
         setTimeout(() => this.reset(this.startX, this.startY), 1000);
     }
 
-    protected abstract getWeapon(): Weapon;
+    protected abstract createWeapon(): Weapon;
 
     private keyDown = (key: number) => this.game.input.keyboard.isDown(key);
 

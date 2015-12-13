@@ -10,7 +10,7 @@ export class Fighter1 extends Player {
         super(level, x, y, 'sprites', 'fighter1.png');
     }
 
-    protected getWeapon(): Weapon {
+    protected createWeapon(): Weapon {
         return new BasicUpWeapon(this.level, () => this.world);
     }
 }
