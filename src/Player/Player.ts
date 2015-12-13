@@ -8,13 +8,13 @@ import keys = Phaser.Keyboard; // shortcut
 export abstract class Player extends Phaser.Sprite implements IShootable {
 
     public level: Level;
+    public weapon: Weapon;
+
+    protected speed: number;
 
     private _debug = false;
     private startX: number;
     private startY: number;
-    private weapon: Weapon;
-
-    protected speed: number;
 
     constructor(level: Level, x: number, y: number, key?: string|Phaser.RenderTexture|Phaser.BitmapData|PIXI.Texture, frame?: string|number) {
 

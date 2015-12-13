@@ -19,6 +19,7 @@ export class Level extends Phaser.State {
 
         // add entities
         this.player = new Fighter1(this, this.game.world.centerX, this.game.world.height*0.8);
+        this.playerMissiles.add(this.player.weapon.missiles);
     }
 
     public update() {

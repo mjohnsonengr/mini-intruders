@@ -13,6 +13,9 @@ export abstract class Weapon {
     public game: Phaser.Game;
     public level: Level;
 
+    // track all ammo so it can be re-used when it has exited the screen.
+    public missiles: Phaser.Group;
+
     // these help determine how and when to fire
     protected fireInterval: number;
     protected fireSpeed: number; // pixels per second
@@ -20,9 +23,6 @@ export abstract class Weapon {
     protected lastFired = 0;
 
     private cachedVelocity: Phaser.Point;
-
-    // track all ammo so it can be re-used when it has exited the screen.
-    private missiles: Phaser.Group;
 
     // gets position of this weapon to fire from
     private getPosition: () => Phaser.Point;
@@ -55,7 +55,6 @@ export abstract class Weapon {
 
     private addMissile(missile: Missile): Missile {
         this.missiles.add(missile);
-        this.level.playerMissiles.add(missile);
         return missile;
     }
 
@@ -73,7 +72,10 @@ export abstract class Weapon {
 
     /** returns a missile suitable for firing. */
     private getMissile(): Missile {
-        console.log(this.missiles.length);
+        var len: number;
+        if ((len = this.missiles.length) > 100) {
+            console.warn("More missiles than expected: " + len);
+        }
         return this.missiles.getFirstExists(false) || this.addMissile(this.createMissile());
     }
 }
